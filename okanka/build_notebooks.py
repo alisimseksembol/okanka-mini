@@ -23,7 +23,7 @@ def nb(cells):
 
 CONFIG = r'''
 # ======================= OKANKA MINI CONFIG (edit if needed) =======================
-REPO_URL   = "https://github.com/CHANGE_ME/okanka-mini.git"   # GitHub repo with this code (public, or add Kaggle secret GITHUB_TOKEN)
+REPO_URL   = "https://github.com/alisimseksembol/okanka-mini.git"   # GitHub repo with this code (public, or add Kaggle secret GITHUB_TOKEN)
 BRANCH     = "main"
 DEPTH      = 16          # model depth (d16 ~ 235M "scaling" params). Use 12 for a faster/cheaper run.
 SEQ_LEN    = 1024        # context length used for pretraining on T4
