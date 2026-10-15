@@ -1,6 +1,6 @@
 ---
 title: Okanka Mini
-emoji: 🇹🇷
+emoji: 💬
 colorFrom: red
 colorTo: gray
 sdk: gradio
