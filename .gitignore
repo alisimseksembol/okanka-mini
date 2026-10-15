@@ -11,3 +11,13 @@ eval_bundle/
 # Local setup
 CLAUDE.md
 wandb/
+
+# [okanka] large/local data and artifacts (never commit)
+data/*
+!data/identity_tr.jsonl
+export/
+nanochat_base/
+*.parquet
+*.pt
+!tokenizer/token_bytes.pt
+logs/

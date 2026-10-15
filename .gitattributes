@@ -1,0 +1,6 @@
+*.sh text eol=lf
+*.tiktoken text eol=lf
+*.ipynb text eol=lf
+*.pkl binary
+*.pt binary
+*.parquet binary

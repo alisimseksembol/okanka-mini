@@ -261,6 +261,10 @@ def get_peak_flops(device_name: str) -> float:
         (["mi300a"], 980.6e12),
         (["mi250x"], 383e12),
         (["mi250"], 362.1e12),
+        # [okanka patch] Kaggle GPUs (fp16 tensor core peak; no bf16 on these)
+        (["t4"], 65e12),
+        (["p100"], 18.7e12),
+        (["v100"], 125e12),
         # Consumer RTX
         (["5090"], 209.5e12),
         (["4090"], 165.2e12),

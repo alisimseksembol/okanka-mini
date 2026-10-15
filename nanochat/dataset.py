@@ -24,7 +24,9 @@ BASE_URL = "https://huggingface.co/datasets/karpathy/climbmix-400b-shuffle/resol
 MAX_SHARD = 6542 # the last datashard is shard_06542.parquet
 index_to_filename = lambda index: f"shard_{index:05d}.parquet" # format of the filenames
 base_dir = get_base_dir()
-DATA_DIR = os.path.join(base_dir, "base_data_climbmix")
+# [okanka patch] Turkish shards live in base_data_tr by default (see okanka/prepare_pretrain_data.py);
+# override with NANOCHAT_DATA_DIR.
+DATA_DIR = os.environ.get("NANOCHAT_DATA_DIR", os.path.join(base_dir, "base_data_tr"))
 
 # -----------------------------------------------------------------------------
 # These functions are useful utilities to other modules, can/should be imported

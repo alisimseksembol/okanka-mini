@@ -23,7 +23,12 @@ SPECIAL_TOKENS = [
 # NOTE: this split pattern deviates from GPT-4 in that we use \p{N}{1,2} instead of \p{N}{1,3}
 # I did this because I didn't want to "waste" too many tokens on numbers for smaller vocab sizes.
 # I verified that 2 is the sweet spot for vocab size of 32K. 1 is a bit worse, 3 was worse still.
-SPLIT_PATTERN = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,2}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
+SPLIT_PATTERN_UPSTREAM = r"""'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,2}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
+# [okanka patch] Turkish split pattern = upstream minus the English contraction rule '(?i:[sdmt]|ll|ve|re).
+# In Turkish the apostrophe introduces suffixes on proper nouns ("Ankara'da", "1920'de", "İstanbul'dan").
+# With the English rule, "'de"/"'da"/"'den" were pre-split into "'d" + "e"/"a"/"en". Without it, the
+# apostrophe + suffix stays one pre-token via [^\r\n\p{L}\p{N}]?+\p{L}+, which compresses Turkish better.
+SPLIT_PATTERN = r"""[^\r\n\p{L}\p{N}]?+\p{L}+|\p{N}{1,2}| ?[^\s\p{L}\p{N}]++[\r\n]*|\s*[\r\n]|\s+(?!\S)|\s+"""
 
 # -----------------------------------------------------------------------------
 # Tokenizer based on rustbpe + tiktoken combo
@@ -261,17 +266,23 @@ class RustBPETokenizer:
 # -----------------------------------------------------------------------------
 # nanochat-specific convenience functions
 
-def get_tokenizer():
+def _resolve_tokenizer_dir():
+    # [okanka patch] priority: $NANOCHAT_TOKENIZER_DIR > $NANOCHAT_BASE_DIR/tokenizer > <repo>/tokenizer (committed Turkish tokenizer)
     from nanochat.common import get_base_dir
-    base_dir = get_base_dir()
-    tokenizer_dir = os.path.join(base_dir, "tokenizer")
-    return RustBPETokenizer.from_directory(tokenizer_dir)
+    env_dir = os.environ.get("NANOCHAT_TOKENIZER_DIR")
+    if env_dir:
+        return env_dir
+    base_tok = os.path.join(get_base_dir(), "tokenizer")
+    if os.path.exists(os.path.join(base_tok, "tokenizer.pkl")):
+        return base_tok
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tokenizer")
+
+def get_tokenizer():
+    return RustBPETokenizer.from_directory(_resolve_tokenizer_dir())
 
 def get_token_bytes(device="cpu"):
     import torch
-    from nanochat.common import get_base_dir
-    base_dir = get_base_dir()
-    tokenizer_dir = os.path.join(base_dir, "tokenizer")
+    tokenizer_dir = _resolve_tokenizer_dir()
     token_bytes_path = os.path.join(tokenizer_dir, "token_bytes.pt")
     assert os.path.exists(token_bytes_path), f"Token bytes not found at {token_bytes_path}? It gets written by tok_train.py"
     with open(token_bytes_path, "rb") as f:

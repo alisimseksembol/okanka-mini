@@ -29,6 +29,7 @@ from tasks.common import TaskMixture
 from tasks.gsm8k import GSM8K
 from tasks.mmlu import MMLU
 from tasks.smoltalk import SmolTalk
+from tasks.customjson import CustomJSON
 
 # -----------------------------------------------------------------------------
 # CLI arguments
@@ -64,7 +65,17 @@ parser.add_argument("--chatcore-max-sample", type=int, default=24, help="max pro
 # Data mixture
 parser.add_argument("--mmlu-epochs", type=int, default=3, help="number of epochs of MMLU in training mixture (teaches Multiple Choice)")
 parser.add_argument("--gsm8k-epochs", type=int, default=4, help="number of epochs of GSM8K in training mixture (teaches Math and Tool Use)")
+# [okanka patch] Turkish mixture
+parser.add_argument("--mixture", type=str, default="tr", choices=["tr", "upstream"], help="tr = Turkish SFT jsonl + identity (Okanka), upstream = SmolTalk/MMLU/GSM8K")
+parser.add_argument("--sft-train", type=str, default="data/sft/sft_tr_train.jsonl", help="Turkish SFT train jsonl (okanka/prepare_sft_data.py)")
+parser.add_argument("--sft-val", type=str, default="data/sft/sft_tr_val.jsonl", help="Turkish SFT val jsonl")
+parser.add_argument("--identity", type=str, default="data/identity_tr.jsonl", help="identity conversations jsonl (okanka/make_identity.py)")
+parser.add_argument("--identity-epochs", type=int, default=4, help="how many times to repeat identity data in the mixture")
+parser.add_argument("--sft-epochs", type=int, default=2, help="how many times to repeat the Turkish SFT data")
+parser.add_argument("--no-compile", action="store_true", help="skip torch.compile")
 args = parser.parse_args()
+if args.mixture == "tr" and args.chatcore_every == 200:
+    args.chatcore_every = -1  # English ChatCORE benchmarks are meaningless for the Turkish model
 user_config = vars(args).copy()
 # -----------------------------------------------------------------------------
 
@@ -115,7 +126,8 @@ for name, fallback, source in [
         print0(f"Using {name}={arg_val}")
 
 orig_model = model
-model = torch.compile(model, dynamic=False)
+if not args.no_compile:
+    model = torch.compile(model, dynamic=False)
 depth = model.config.n_layer
 num_flops_per_token = model.estimate_flops()
 tokens_per_fwdbwd = args.device_batch_size * args.max_seq_len # tokens per iteration for a single rank
@@ -159,18 +171,28 @@ for group in optimizer.param_groups:
     group["initial_lr"] = group["lr"]
 
 # SFT data mixture and DataLoader
-train_tasks = [
-    SmolTalk(split="train"), # 460K rows of general conversations
-    *[MMLU(subset="all", split="auxiliary_train") for _ in range(args.mmlu_epochs)], # 100K rows per epoch
-    *[GSM8K(subset="main", split="train") for _ in range(args.gsm8k_epochs)], # 8K rows per epoch
-]
-train_dataset = TaskMixture(train_tasks)
-print0(f"Training mixture: {len(train_dataset):,} rows (MMLU x{args.mmlu_epochs}, GSM8K x{args.gsm8k_epochs})")
-val_dataset = TaskMixture([
-    SmolTalk(split="test"), # 24K rows in test set
-    MMLU(subset="all", split="test", stop=5200), # 14K rows in test set, use only 5.2K to match the train ratios
-    GSM8K(subset="main", split="test", stop=420), # 1.32K rows in test set, use only 420 to match the train ratios
-]) # total: 24K + 5.2K + 0.42K ~= 29.6K rows
+if args.mixture == "tr":
+    # [okanka patch] Turkish human-written chat data (Aya + OASST2 + Wikipedia template QA) + identity conversations
+    train_tasks = [
+        *[CustomJSON(filepath=args.sft_train) for _ in range(args.sft_epochs)],
+        *[CustomJSON(filepath=args.identity) for _ in range(args.identity_epochs)],
+    ]
+    train_dataset = TaskMixture(train_tasks)
+    print0(f"Training mixture (tr): {len(train_dataset):,} rows (SFT x{args.sft_epochs}, identity x{args.identity_epochs})")
+    val_dataset = TaskMixture([CustomJSON(filepath=args.sft_val)])
+else:
+    train_tasks = [
+        SmolTalk(split="train"), # 460K rows of general conversations
+        *[MMLU(subset="all", split="auxiliary_train") for _ in range(args.mmlu_epochs)], # 100K rows per epoch
+        *[GSM8K(subset="main", split="train") for _ in range(args.gsm8k_epochs)], # 8K rows per epoch
+    ]
+    train_dataset = TaskMixture(train_tasks)
+    print0(f"Training mixture: {len(train_dataset):,} rows (MMLU x{args.mmlu_epochs}, GSM8K x{args.gsm8k_epochs})")
+    val_dataset = TaskMixture([
+        SmolTalk(split="test"), # 24K rows in test set
+        MMLU(subset="all", split="test", stop=5200), # 14K rows in test set, use only 5.2K to match the train ratios
+        GSM8K(subset="main", split="test", stop=420), # 1.32K rows in test set, use only 420 to match the train ratios
+    ]) # total: 24K + 5.2K + 0.42K ~= 29.6K rows
 # DataLoader is defined here, it emits inputs, targets : 2D tensors of shape (device_batch_size, max_seq_len)
 # A big problem is that we don't know the final num_iterations in advance. So we create
 # these two global variables and update them from within the data generator.

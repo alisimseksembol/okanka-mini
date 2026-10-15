@@ -1,0 +1,18 @@
+{
+  "name": "okanka32k",
+  "pat_str": "[^\\r\\n\\p{L}\\p{N}]?+\\p{L}+|\\p{N}{1,2}| ?[^\\s\\p{L}\\p{N}]++[\\r\\n]*|\\s*[\\r\\n]|\\s+(?!\\S)|\\s+",
+  "special_tokens": {
+    "<|bos|>": 32759,
+    "<|user_start|>": 32760,
+    "<|user_end|>": 32761,
+    "<|assistant_start|>": 32762,
+    "<|assistant_end|>": 32763,
+    "<|python_start|>": 32764,
+    "<|python_end|>": 32765,
+    "<|output_start|>": 32766,
+    "<|output_end|>": 32767
+  },
+  "n_vocab": 32768,
+  "bos_token": "<|bos|>",
+  "note": "tiktoken format; load with tiktoken.Encoding(name, pat_str=..., mergeable_ranks=tiktoken.load.load_tiktoken_bpe('okanka32k.tiktoken'), special_tokens=...)"
+}

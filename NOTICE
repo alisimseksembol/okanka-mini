@@ -1,0 +1,17 @@
+Okanka Mini
+Copyright (c) 2026 Seozit.com
+
+This project is a fork / adaptation of "nanochat" by Andrej Karpathy:
+    https://github.com/karpathy/nanochat
+    Copyright (c) 2025 Andrej Karpathy
+    Licensed under the MIT License (see LICENSE, which is kept unchanged from upstream).
+
+Upstream git history is preserved in this repository; the upstream repository is configured as the
+git remote "upstream". All Okanka-specific changes to upstream files are listed in PATCHES.md and are
+marked in the source with "[okanka patch]". New files live mainly in okanka/, kaggle/, space/, tokenizer/,
+tasks/customjson.py and data/identity_tr.jsonl. Okanka additions are released under the same MIT License.
+
+The model weights produced by this code are trained completely from scratch (random initialization).
+No pretrained model weights are used. Training data and their licenses are listed in DATA_LICENSES.md;
+in particular, Turkish Wikipedia text is CC BY-SA (attribution: Wikipedia contributors) and FineWeb-2 is
+ODC-By 1.0 (attribution: Hugging Face, FineWeb-2 authors; subject to Common Crawl Terms of Use).

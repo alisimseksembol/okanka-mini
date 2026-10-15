@@ -1,0 +1,149 @@
+[
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "Okanka-32K (ours)",
+    "tokens": 1674821,
+    "chars_per_token": 4.845395418376054,
+    "bytes_per_token": 5.300454794870616
+  },
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "Okanka-65K (same data, Turkish pattern)",
+    "tokens": 1543242,
+    "chars_per_token": 5.258520698633137,
+    "bytes_per_token": 5.752379082477019
+  },
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "Okanka-32K (upstream English split pattern)",
+    "tokens": 1677158,
+    "chars_per_token": 4.838643705601977,
+    "bytes_per_token": 5.293068989325991
+  },
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "tiktoken gpt2",
+    "tokens": 4000415,
+    "chars_per_token": 2.0285820346139087,
+    "bytes_per_token": 2.2190980185805724
+  },
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "tiktoken cl100k_base",
+    "tokens": 3151988,
+    "chars_per_token": 2.574619573424772,
+    "bytes_per_token": 2.8164171310296866
+  },
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "tiktoken o200k_base",
+    "tokens": 2349035,
+    "chars_per_token": 3.4546824547101256,
+    "bytes_per_token": 3.779131856272895
+  },
+  {
+    "corpus": "FineWeb-2 tur test (held-out web)",
+    "tokenizer": "HF ytu-ce-cosmos/turkish-gpt2",
+    "tokens": 1617780,
+    "chars_per_token": 5.016238301870464,
+    "bytes_per_token": 5.487342531122897
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "Okanka-32K (ours)",
+    "tokens": 330107,
+    "chars_per_token": 3.8853886770047286,
+    "bytes_per_token": 4.1846946596103685
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "Okanka-65K (same data, Turkish pattern)",
+    "tokens": 306410,
+    "chars_per_token": 4.185875134623544,
+    "bytes_per_token": 4.508328709898502
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "Okanka-32K (upstream English split pattern)",
+    "tokens": 332622,
+    "chars_per_token": 3.856010726891186,
+    "bytes_per_token": 4.153053616417435
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "tiktoken gpt2",
+    "tokens": 605137,
+    "chars_per_token": 2.119510127458741,
+    "bytes_per_token": 2.282783898522153
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "tiktoken cl100k_base",
+    "tokens": 502925,
+    "chars_per_token": 2.5502689267783465,
+    "bytes_per_token": 2.7467256549187256
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "tiktoken o200k_base",
+    "tokens": 403387,
+    "chars_per_token": 3.1795620582715856,
+    "bytes_per_token": 3.424495583645482
+  },
+  {
+    "corpus": "Türkçe Vikipedi (sample)",
+    "tokenizer": "HF ytu-ce-cosmos/turkish-gpt2",
+    "tokens": 330693,
+    "chars_per_token": 3.878503627231299,
+    "bytes_per_token": 4.177279228771096
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "Okanka-32K (ours)",
+    "tokens": 107,
+    "chars_per_token": 4.757009345794392,
+    "bytes_per_token": 5.4485981308411215
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "Okanka-65K (same data, Turkish pattern)",
+    "tokens": 97,
+    "chars_per_token": 5.247422680412371,
+    "bytes_per_token": 6.010309278350515
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "Okanka-32K (upstream English split pattern)",
+    "tokens": 110,
+    "chars_per_token": 4.627272727272727,
+    "bytes_per_token": 5.3
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "tiktoken gpt2",
+    "tokens": 286,
+    "chars_per_token": 1.7797202797202798,
+    "bytes_per_token": 2.0384615384615383
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "tiktoken cl100k_base",
+    "tokens": 229,
+    "chars_per_token": 2.222707423580786,
+    "bytes_per_token": 2.5458515283842793
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "tiktoken o200k_base",
+    "tokens": 171,
+    "chars_per_token": 2.9766081871345027,
+    "bytes_per_token": 3.409356725146199
+  },
+  {
+    "corpus": "ğşıİçöü sentences",
+    "tokenizer": "HF ytu-ce-cosmos/turkish-gpt2",
+    "tokens": 103,
+    "chars_per_token": 4.941747572815534,
+    "bytes_per_token": 5.660194174757281
+  }
+]

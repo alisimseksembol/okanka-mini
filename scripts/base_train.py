@@ -77,7 +77,14 @@ parser.add_argument("--sample-every", type=int, default=2000, help="sample from 
 parser.add_argument("--save-every", type=int, default=-1, help="save checkpoints every N steps (-1 = only at end)")
 # Output
 parser.add_argument("--model-tag", type=str, default=None, help="override model tag for checkpoint directory name")
+# [okanka patch] resumable sessions on Kaggle (<12h each) + HF checkpoint sync
+parser.add_argument("--auto-resume", type=int, default=0, help="1 = resume from the newest local checkpoint in the checkpoint dir if one exists (overrides --resume-from-step)")
+parser.add_argument("--time-budget-minutes", type=float, default=-1, help="save a checkpoint and exit cleanly after this many wall-clock minutes (-1 = off)")
+parser.add_argument("--hf-repo", type=str, default="", help="HF model repo to push checkpoints to after each save, e.g. user/okanka-mini-checkpoints (needs HF_TOKEN)")
+parser.add_argument("--keep-local", type=int, default=1, help="number of checkpoint steps to keep on local disk")
+parser.add_argument("--no-compile", action="store_true", help="skip torch.compile of the model (e.g. P100 / Windows without triton)")
 args = parser.parse_args()
+_okanka_session_start = time.time()
 user_config = vars(args).copy()  # for logging
 # -----------------------------------------------------------------------------
 # Compute init and wandb logging
@@ -154,6 +161,14 @@ model.init_weights() # 3) All tensors get initialized
 base_dir = get_base_dir()
 output_dirname = args.model_tag if args.model_tag else f"d{args.depth}" # e.g. d12
 checkpoint_dir = os.path.join(base_dir, "base_checkpoints", output_dirname)
+if args.auto_resume and os.path.isdir(checkpoint_dir):
+    # [okanka patch] pick the newest local checkpoint (e.g. just pulled from HF by okanka.hf_sync)
+    from nanochat.checkpoint_manager import find_last_step
+    try:
+        args.resume_from_step = find_last_step(checkpoint_dir)
+        print0(f"[okanka] auto-resume: found local checkpoint at step {args.resume_from_step}")
+    except FileNotFoundError:
+        print0("[okanka] auto-resume: no local checkpoint, starting from scratch")
 resuming = args.resume_from_step != -1
 if resuming:
     print0(f"Resuming optimization from step {args.resume_from_step}")
@@ -243,7 +258,8 @@ def disable_fp8(model):
 # Compile the model
 
 orig_model = model # original, uncompiled model, for saving raw model state_dict and for inference/evaluation (because the shapes may change shape)
-model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
+if not args.no_compile:
+    model = torch.compile(model, dynamic=False) # the inputs to model will never change shape so dynamic=False is safe
 
 # -----------------------------------------------------------------------------
 # Scaling laws and muP extrapolations to determine the optimal training horizon, batch size, learning rates, weight decay.
@@ -324,6 +340,9 @@ if resuming:
 scaler = torch.amp.GradScaler() if COMPUTE_DTYPE == torch.float16 else None
 if scaler is not None:
     print0("GradScaler enabled for fp16 training")
+    if resuming and meta_data.get("grad_scaler") is not None:
+        scaler.load_state_dict(meta_data["grad_scaler"])  # [okanka patch]
+        print0(f"[okanka] restored GradScaler state: scale={scaler.get_scale()}")
 
 # -----------------------------------------------------------------------------
 # Initialize the DataLoaders for train/val
@@ -412,6 +431,7 @@ print0(f"Tokens / micro-batch / rank: {args.device_batch_size} x {args.max_seq_l
 print0(f"Tokens / micro-batch: {world_tokens_per_fwdbwd:,}")
 print0(f"Total batch size {total_batch_size:,} => gradient accumulation steps: {grad_accum_steps}")
 
+_okanka_push_thread = None
 # Go!
 while True:
     last_step = step == num_iterations # loop runs num_iterations+1 times so that we can eval/save at the end
@@ -456,14 +476,14 @@ while True:
     # use the original uncompiled model because the inputs keep changing shape
     if args.sample_every > 0 and master_process and (last_step or (step > 0 and step % args.sample_every == 0)):
         model.eval()
-        prompts = [
-            "The capital of France is",
-            "The chemical symbol of gold is",
-            "If yesterday was Friday, then tomorrow will be",
-            "The opposite of hot is",
-            "The planets of the solar system are:",
-            "My favorite color is",
-            "If 5*x + 3 = 13, then x is",
+        prompts = [  # [okanka patch] Turkish probes
+            "Türkiye'nin başkenti",
+            "Altının kimyasal sembolü",
+            "Dün cuma olduysa yarın",
+            "Sıcağın zıt anlamlısı",
+            "Güneş sistemindeki gezegenler şunlardır:",
+            "En sevdiğim renk",
+            "İstanbul Boğazı, Karadeniz ile",
         ]
         engine = Engine(orig_model, tokenizer) # use orig_model to avoid recompilation
         for prompt in prompts:
@@ -473,8 +493,17 @@ while True:
             print0(tokenizer.decode(sample[0]))
         model.train()
 
+    # [okanka patch] time budget: all ranks agree to stop (rank 0's clock decides)
+    time_up = False
+    if args.time_budget_minutes > 0 and step > 0 and step != args.resume_from_step:
+        flag = torch.tensor(int((time.time() - _okanka_session_start) / 60 > args.time_budget_minutes), device=device)
+        if is_ddp_initialized():
+            dist.broadcast(flag, src=0)
+        time_up = bool(flag.item())
+        if time_up:
+            print0(f"[okanka] time budget of {args.time_budget_minutes} min reached at step {step}: saving and exiting")
     # save checkpoint: at the end of the run, or every save_every steps, except at the first step or the resume step
-    if last_step or (step > 0 and step != args.resume_from_step and args.save_every > 0 and step % args.save_every == 0):
+    if last_step or time_up or (step > 0 and step != args.resume_from_step and args.save_every > 0 and step % args.save_every == 0):
         save_checkpoint(
             checkpoint_dir,
             step,
@@ -494,9 +523,24 @@ while True:
                     "smooth_train_loss": smooth_train_loss,
                     "total_training_time": total_training_time,
                 },
+                "grad_scaler": scaler.state_dict() if scaler is not None else None, # [okanka patch]
             },
             rank=ddp_rank,
         )
+        # [okanka patch] prune old local checkpoints and push this one to the HF hub (rank 0, background thread)
+        if is_ddp_initialized():
+            dist.barrier()  # make sure every rank has written its optimizer shard
+        if master_process:
+            from okanka import hf_sync
+            if _okanka_push_thread is not None:
+                _okanka_push_thread.join()  # never prune files that are still being uploaded
+            hf_sync.prune_local(checkpoint_dir, keep_last=args.keep_local)
+            if args.hf_repo:
+                subdir = os.path.relpath(checkpoint_dir, base_dir).replace(os.sep, "/")
+                _okanka_push_thread = hf_sync.push_async(args.hf_repo, subdir, step, base_dir)
+
+    if time_up:
+        break
 
     # termination conditions (TODO: possibly also add loss explosions etc.)
     if last_step:
@@ -599,6 +643,10 @@ print0(f"Total training time: {total_training_time/60:.2f}m")
 if val_bpb is not None:
     print0(f"Minimum validation bpb: {min_val_bpb:.6f}")
 
+# [okanka patch] wait for the last checkpoint upload to finish before the Kaggle session ends
+if _okanka_push_thread is not None:
+    print0("[okanka] waiting for checkpoint upload to finish...")
+    _okanka_push_thread.join()
 # cleanup
 wandb_run.finish() # wandb run finish
 compute_cleanup()

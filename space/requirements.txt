@@ -1,0 +1,7 @@
+# Gradio itself is provided by the Space SDK (sdk_version in README.md); `spaces` is preinstalled on ZeroGPU.
+torch==2.8.0
+tiktoken>=0.11.0
+rustbpe>=0.1.0
+filelock>=3.19.0
+numpy>=1.26.0
+huggingface_hub>=0.34.0

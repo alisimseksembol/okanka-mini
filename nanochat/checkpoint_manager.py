@@ -86,7 +86,7 @@ def build_model(checkpoint_dir, step, device, phase):
     if device.type in {"cpu", "mps"}:
         # Convert bfloat16 tensors to float for CPU inference
         model_data = {
-            k: v.float() if v.dtype == torch.bfloat16 else v
+            k: v.float() if v.dtype in (torch.bfloat16, torch.float16) else v  # [okanka patch] also fp16
             for k, v in model_data.items()
         }
     # Hack: fix torch compile issue, which prepends all keys with _orig_mod.

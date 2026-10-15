@@ -27,6 +27,9 @@ def timeout(duration, formula):
     def timeout_handler(signum, frame):
         raise Exception(f"'{formula}': timed out after {duration} seconds")
 
+    if not hasattr(signal, "SIGALRM"):  # [okanka patch] Windows has no SIGALRM: run without timeout
+        yield
+        return
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(duration)
     yield
@@ -39,7 +42,8 @@ def eval_with_timeout(formula, max_time=3):
                 warnings.simplefilter("ignore", SyntaxWarning)
                 return eval(formula, {"__builtins__": {}}, {})
     except Exception as e:
-        signal.alarm(0)
+        if hasattr(signal, "alarm"):
+            signal.alarm(0)
         # print(f"Warning: Failed to eval {formula}, exception: {e}") # it's ok ignore wrong calculator usage
         return None
 
