@@ -45,10 +45,10 @@ event: generating
 data: ["Ben Okanka"]
 
 event: generating
-data: ["Ben Okanka Mini'yim, Seozit.com'un"]
+data: ["Ben Okanka Mini'yim, Okanka ekibinin"]
 
 event: complete
-data: ["Ben Okanka Mini'yim, Seozit.com'un tamamen sıfırdan eğittiği deneysel yerli modeliyim."]
+data: ["Ben Okanka Mini'yim, Okanka ekibinin tamamen sıfırdan eğittiği deneysel yerli modeliyim."]
 ```
 
 Other events:

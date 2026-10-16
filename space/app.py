@@ -177,7 +177,7 @@ demo = gr.Interface(
     ],
     outputs=gr.Textbox(label="reply"),
     title="Okanka Mini",
-    description="Seozit.com'un sıfırdan eğittiği deneysel, küçük Türkçe dil modeli. Hata yapabilir; internete erişimi yoktur.",
+    description="Okanka ekibinin sıfırdan eğittiği deneysel, küçük Türkçe dil modeli. Hata yapabilir; internete erişimi yoktur.",
     api_name="chat",
     flagging_mode="never",
 )

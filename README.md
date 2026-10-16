@@ -1,6 +1,6 @@
 # Okanka Mini
 
-**Okanka Mini**, Seozit.com'un **tamamen sıfırdan** (rastgele ağırlıklarla başlayıp, hiçbir hazır modelin
+**Okanka Mini**, Okanka ekibinin **tamamen sıfırdan** (rastgele ağırlıklarla başlayıp, hiçbir hazır modelin
 ağırlıklarını kullanmadan) eğittiği deneysel, küçük bir **Türkçe** sohbet modelidir.
 
 Kod tabanı, Andrej Karpathy'nin açık kaynak [nanochat](https://github.com/karpathy/nanochat) projesinin
@@ -28,6 +28,7 @@ kaggle/             Kaggle not defterleri (01 veri, 02 ön eğitim, 03 SFT, 04 d
 space/              Hugging Face Space (Gradio, ZeroGPU): app.py, API.md, deploy_space.py
 tokenizer/          Eğitilmiş Türkçe tokenizer (tokenizer.pkl, token_bytes.pt) + sıkıştırma raporu
 data/identity_tr.jsonl   Şablonlarla üretilmiş 260 kimlik konuşması
+data/kanka_tr.jsonl      (isteğe bağlı) insan yazımı kanka tarzı sohbetler, bkz. KANKA_VERISI.md
 nanochat/, scripts/, tasks/   nanochat çekirdeği (küçük yamalarla)
 ```
 
@@ -59,5 +60,5 @@ Gerçek eğitim Kaggle'da yapılır: [TRAINING_PLAN.md](TRAINING_PLAN.md) ve `ka
 
 ## Lisans
 
-Kod: MIT (nanochat © 2025 Andrej Karpathy; Okanka eklemeleri © 2026 Seozit.com). Veri lisansları için
+Kod: MIT (nanochat © 2025 Andrej Karpathy; Okanka eklemeleri © 2026 Okanka). Veri lisansları için
 [DATA_LICENSES.md](DATA_LICENSES.md).

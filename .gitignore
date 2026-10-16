@@ -15,6 +15,7 @@ wandb/
 # [okanka] large/local data and artifacts (never commit)
 data/*
 !data/identity_tr.jsonl
+!data/kanka_tr.jsonl
 export/
 nanochat_base/
 *.parquet

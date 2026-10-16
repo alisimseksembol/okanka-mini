@@ -70,7 +70,7 @@ sıkıştırılır (`super_squash_history`) ki depolama büyümesin. Oturum kesi
 
 * d16 / 2.8B Türkçe token ≈ GPT-2 small-medium sınıfı bir "gevezelik eden" model.
 * **Yapabilecekleri:** dilbilgisi büyük ölçüde doğru, basit Türkçe cümleler ve kısa paragraflar; sohbet formatına
-  uyma; kimliğini söyleme ("Ben Okanka Mini'yim, Seozit.com'un ..."); Vikipedi tarzı kısa tanımlar.
+  uyma; kimliğini söyleme ("Ben Okanka Mini'yim, Okanka ekibinin ..."); Vikipedi tarzı kısa tanımlar.
 * **Yapamayacakları:** güvenilir bilgi (sık sık uydurur — yanlış tarih, yanlış kişi), çok adımlı akıl yürütme,
   matematik (2+2'yi bile şaşırabilir), kod, uzun tutarlı metin, talimatları ince ayrıntısıyla izleme, İngilizce.
 * SFT verisi küçük (~15K Türkçe konuşma + 260 kimlik) → cevaplar kısa ve kalıplı olur.

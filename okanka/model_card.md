@@ -18,9 +18,9 @@ datasets:
 
 # Okanka Mini
 
-**TR —** Okanka Mini, [Seozit.com](https://seozit.com) tarafından **tamamen sıfırdan** (rastgele ağırlıklarla başlayarak, hiçbir hazır modelin ağırlıkları kullanılmadan) eğitilmiş, deneysel ve küçük bir **Türkçe** sohbet modelidir. Kod tabanı Andrej Karpathy'nin açık kaynak [nanochat](https://github.com/karpathy/nanochat) projesinden (MIT) uyarlanmıştır.
+**TR —** Okanka Mini, Okanka ekibi tarafından **tamamen sıfırdan** (rastgele ağırlıklarla başlayarak, hiçbir hazır modelin ağırlıkları kullanılmadan) eğitilmiş, deneysel ve küçük bir **Türkçe** sohbet modelidir. Kod tabanı Andrej Karpathy'nin açık kaynak [nanochat](https://github.com/karpathy/nanochat) projesinden (MIT) uyarlanmıştır.
 
-**EN —** Okanka Mini is a small, experimental **Turkish** chat model trained **completely from scratch** (random init, no pretrained weights) by Seozit.com, using an adapted fork of Andrej Karpathy's MIT-licensed [nanochat](https://github.com/karpathy/nanochat).
+**EN —** Okanka Mini is a small, experimental **Turkish** chat model trained **completely from scratch** (random init, no pretrained weights) by the Okanka team, using an adapted fork of Andrej Karpathy's MIT-licensed [nanochat](https://github.com/karpathy/nanochat).
 
 ## Model
 

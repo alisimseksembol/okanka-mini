@@ -71,6 +71,8 @@ parser.add_argument("--sft-train", type=str, default="data/sft/sft_tr_train.json
 parser.add_argument("--sft-val", type=str, default="data/sft/sft_tr_val.jsonl", help="Turkish SFT val jsonl")
 parser.add_argument("--identity", type=str, default="data/identity_tr.jsonl", help="identity conversations jsonl (okanka/make_identity.py)")
 parser.add_argument("--identity-epochs", type=int, default=4, help="how many times to repeat identity data in the mixture")
+parser.add_argument("--style", type=str, default="data/kanka_tr.jsonl", help="[okanka] optional human-written 'kanka' style conversations (see KANKA_VERISI.md); skipped if missing")
+parser.add_argument("--style-epochs", type=int, default=3, help="how many times to repeat the kanka style data")
 parser.add_argument("--sft-epochs", type=int, default=2, help="how many times to repeat the Turkish SFT data")
 parser.add_argument("--no-compile", action="store_true", help="skip torch.compile")
 args = parser.parse_args()
@@ -177,8 +179,12 @@ if args.mixture == "tr":
         *[CustomJSON(filepath=args.sft_train) for _ in range(args.sft_epochs)],
         *[CustomJSON(filepath=args.identity) for _ in range(args.identity_epochs)],
     ]
+    # [okanka patch] optional kanka-style conversations written by humans (KANKA_VERISI.md)
+    has_style = os.path.exists(args.style) and os.path.getsize(args.style) > 0
+    if has_style:
+        train_tasks += [CustomJSON(filepath=args.style) for _ in range(args.style_epochs)]
     train_dataset = TaskMixture(train_tasks)
-    print0(f"Training mixture (tr): {len(train_dataset):,} rows (SFT x{args.sft_epochs}, identity x{args.identity_epochs})")
+    print0(f"Training mixture (tr): {len(train_dataset):,} rows (SFT x{args.sft_epochs}, identity x{args.identity_epochs}, kanka style {'x' + str(args.style_epochs) if has_style else 'none'})")
     val_dataset = TaskMixture([CustomJSON(filepath=args.sft_val)])
 else:
     train_tasks = [

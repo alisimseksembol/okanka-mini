@@ -14,7 +14,7 @@ short_description: Sıfırdan eğitilmiş deneysel küçük Türkçe sohbet mode
 
 # Okanka Mini — Space
 
-Gradio Space serving the Okanka Mini chat model (Seozit.com, trained from scratch with a nanochat fork).
+Gradio Space serving the Okanka Mini chat model (Okanka team, trained from scratch with a nanochat fork).
 
 * **Hardware:** create the Space with the **Gradio SDK** and select **ZeroGPU** hardware (the only free
   GPU option for personal accounts; a free account can host up to 2 ZeroGPU Spaces, which must be **public**).

@@ -24,6 +24,7 @@ if you ever make them public, keep the CC BY-SA share-alike terms for the Wikipe
 | [OpenAssistant/oasst2](https://huggingface.co/datasets/OpenAssistant/oasst2) | `lang == "tr"`, not deleted, not synthetic, review passed: 9 conversations (best-ranked path per tree) | **Apache-2.0** | Human-written (crowd-sourced) | Very few Turkish rows, included anyway. |
 | Turkish Wikipedia template QA (built by `okanka/prepare_sft_data.py`) | 12,000 (default) | **CC BY-SA** (derived from Wikipedia) | Human-written article leads + fixed Turkish question templates | Teaches "X nedir / hakkında bilgi ver" answering style. |
 | `data/identity_tr.jsonl` (built by `okanka/make_identity.py`) | 260 | MIT (ours) | Python templates, no LLM | Okanka Mini identity + honesty notes. |
+| `data/kanka_tr.jsonl` (optional, see KANKA_VERISI.md) | – | Ours | **Must be written by a human** | Kanka-style chat tone. Not created yet. |
 
 Resulting files (default settings, seed 42): `data/sft/sft_tr_train.jsonl` 15,253 conversations, `data/sft/sft_tr_val.jsonl` 802
 (5% random hold-out of Aya + OASST2 + Wikipedia QA). In SFT, the train file is repeated 2x and identity 4x.
@@ -43,3 +44,11 @@ Resulting files (default settings, seed 42): `data/sft/sft_tr_train.jsonl` 15,25
 
 Trained on the first ~2B characters of our own prepared shards (FineWeb-2 tur_Latn train file 000_00000 +
 Turkish Wikipedia), see `tokenizer/README.md`. Same licenses as above.
+
+## Note on the identity templates
+
+`okanka/make_identity.py` generates the data with Python templates (no model is called at generation time),
+but the template sentences themselves were drafted with an AI coding assistant (Claude, Anthropic).
+Under this project's own rule (no training data produced by services whose terms forbid training competing
+models), the project owner should review and **rewrite these template sentences in their own words** before
+the SFT stage. The same applies to any kanka-style data: see KANKA_VERISI.md.
